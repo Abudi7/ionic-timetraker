@@ -106,11 +106,11 @@ Workflow: `.github/workflows/ci.yml`
 
 ---
 
-## 📸 Screenshots
+## 🖥️ Screenshots
 
 | Web (Browser) | iOS (Simulator) |
 |---------------|-----------------|
-| ![Web](docs/screenshots/web.png) | ![iOS](docs/screenshots/ios.png) |
+| <img width="1678" height="793" alt="Web App" src="https://github.com/user-attachments/assets/6e6ac81c-1904-418a-af88-fb30c4de1e7b" /> | <img width="391" height="867" alt="iOS App" src="https://github.com/user-attachments/assets/d7df4e57-28b2-4e6c-b224-b6bc5b6c9fac" /> |
 
 ---
 
