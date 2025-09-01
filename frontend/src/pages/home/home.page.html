@@ -1,0 +1,46 @@
+<ion-header>
+    <ion-toolbar>
+      <ion-title>TimeTrac</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="logout()">Logout</ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding gradient-bg">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Today's Total</ion-card-title>
+        <ion-card-subtitle>
+          {{ displayedTotal }} min
+          <span *ngIf="isRunning">&nbsp;•&nbsp;Running: {{ liveDisplay }}</span>
+        </ion-card-subtitle>
+      </ion-card-header>
+  
+      <ion-card-content>
+        <div class="live-counter" *ngIf="isRunning">{{ liveDisplay }}</div>
+  
+        <ion-button expand="block" (click)="start()" [disabled]="loading || isRunning">Start</ion-button>
+        <ion-button expand="block" color="medium" (click)="stop()" [disabled]="loading || !isRunning">Stop</ion-button>
+        <ion-button fill="clear" (click)="refresh()" [disabled]="loading">Refresh</ion-button>
+      </ion-card-content>
+    </ion-card>
+  
+    <ion-list>
+      <ion-list-header>Today's Sessions</ion-list-header>
+      <ion-item *ngFor="let s of sessions">
+        <ion-label>
+          <h3>#{{ s.id }}</h3>
+          <p>Start: {{ s.startTime | date:'short' }}</p>
+          <p *ngIf="s.endTime">End: {{ s.endTime | date:'short' }}</p>
+          <p *ngIf="s.durationMinutes != null">Duration: {{ s.durationMinutes }} min</p>
+          <p *ngIf="!s.endTime">Running…</p>
+        </ion-label>
+      </ion-item>
+  
+      <ion-item *ngIf="!sessions?.length">
+        <ion-label>No sessions yet today.</ion-label>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+  

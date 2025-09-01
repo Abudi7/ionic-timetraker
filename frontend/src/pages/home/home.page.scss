@@ -1,0 +1,37 @@
+/* animated gradient background */
+.gradient-bg {
+    --background: transparent;
+    background: linear-gradient(120deg, #6a11cb, #2575fc, #00c6ff, #f7971e) no-repeat;
+    background-size: 400% 400%;
+    animation: gradientMove 12s ease infinite;
+    min-height: 100%;
+  }
+  
+  @keyframes gradientMove {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  ion-card {
+    border-radius: 18px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    backdrop-filter: blur(3px);
+  }
+  
+  .live-counter {
+    font-variant-numeric: tabular-nums;
+    font-size: 42px;
+    line-height: 1;
+    text-align: center;
+    margin: 8px 0 16px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity: 0.95; }
+    50%     { transform: scale(1.03); opacity: 1; }
+  }
+  
+  ion-button { margin-top: 8px; }
+  

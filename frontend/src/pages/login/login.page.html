@@ -1,0 +1,33 @@
+<ion-header collapse="condense" translucent="true">
+    <div class="app-header">
+      <div>
+        <div class="app-title">Sign In</div>
+        <div class="app-sub">Welcome back</div>
+      </div>
+    </div>
+  </ion-header>
+  
+  <ion-content fullscreen>
+    <div class="ion-padding">
+      <ion-card class="card-glass">
+        <ion-card-content>
+          <ion-list lines="none">
+            <ion-item class="card-glass" style="border-radius:14px;margin:8px;">
+              <ion-input label="Email" label-placement="floating" [(ngModel)]="email" type="email"></ion-input>
+            </ion-item>
+            <ion-item class="card-glass" style="border-radius:14px;margin:8px;">
+              <ion-input label="Password" label-placement="floating" [(ngModel)]="password" type="password"></ion-input>
+            </ion-item>
+          </ion-list>
+  
+          <ion-button expand="block" class="btn-primary" (click)="doLogin()" [disabled]="loading">
+            {{ loading ? 'Loading…' : 'Login' }}
+          </ion-button>
+          <ion-button expand="block" fill="clear" class="btn-ghost" (click)="quickRegister()" style="margin-top:8px;">
+            Quick Register
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </ion-content>
+  
