@@ -1,0 +1,62 @@
+name: compose-e2e
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  up-and-healthcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set API image tag
+        run: echo "API_IMG=ghcr.io/${{ github.repository }}/api:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Set Web image tag
+        run: echo "WEB_IMG=ghcr.io/${{ github.repository }}/web:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Docker login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull images (if exist)
+        run: |
+          docker pull $API_IMG || true
+          docker pull $WEB_IMG || true
+
+      - name: Compose up (detached)
+        run: |
+          DOCKER_DEFAULT_PLATFORM=linux/amd64 \
+          docker compose -f docker-compose.yml up -d
+        env:
+          # override images if you want compose to use GHCR versions
+          API_IMG: ${{ env.API_IMG }}
+          WEB_IMG: ${{ env.WEB_IMG }}
+
+      - name: Wait for API health
+        run: |
+          for i in {1..30}; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8087/health || true)
+            if [ "$code" = "200" ]; then echo "API OK"; exit 0; fi
+            sleep 2
+          done
+          echo "API not healthy"; docker compose logs api; exit 1
+
+      - name: Smoke request: register (should 200/409)
+        run: |
+          curl -i -X POST http://localhost:8087/auth/register \
+            -H "Content-Type: application/json" \
+            -d '{"email":"ci@demo.io","password":"demo123"}' || true
+
+      - name: Teardown
+        if: always()
+        run: docker compose down -v
