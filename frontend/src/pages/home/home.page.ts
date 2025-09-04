@@ -1,10 +1,13 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ToastController } from '@ionic/angular';
+import {
+  IonicModule, ToastController
+} from '@ionic/angular';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
 import { TimeService } from '../../services/time.service';
 import { AuthService } from '../../core/auth.service';
-import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-home',
@@ -14,10 +17,15 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./home.page.scss']
 })
 export class HomePage implements OnInit, OnDestroy {
+  private time = inject(TimeService);
+  private toast = inject(ToastController);
+  private auth = inject(AuthService);
+  private router = inject(Router);
+
   loading = false;
 
   // API state
-  total = 0;           // finished minutes today
+  total = 0;                 // finished minutes today
   sessions: any[] = [];
 
   // live state
@@ -26,20 +34,36 @@ export class HomePage implements OnInit, OnDestroy {
   liveSeconds = 0;
   private tick?: any;
 
-  // Derived values
+  // UI helpers
+  skeletons = Array.from({ length: 3 });
+  userName?: string;
+  userAvatar?: string;
+
+  // Derived
   get liveMinutes(): number { return Math.floor(this.liveSeconds / 60); }
   get displayedTotal(): number { return this.total + (this.isRunning ? this.liveMinutes : 0); }
   get liveDisplay(): string { return this.formatMMSS(this.liveSeconds); }
 
-  constructor(
-    private time: TimeService,
-    private toast: ToastController,
-    private auth: AuthService,
-    private router: Router
-  ) {}
+  async ngOnInit() {
+    // Optional: read user data if your AuthService exposes it (e.g. an observable `user$`
+    // or a getter like `getCurrentUser()`); keep fallbacks so the template stays safe.
+    try {
+      // Example alternatives you can enable if your AuthService provides them:
+      // const u = await this.auth.user$?.toPromise?.();
+      // const u = this.auth.getCurrentUser?.();
+      // For now use a safe default so compilation succeeds without relying on a specific API:
+      this.userName = 'User';
+      this.userAvatar = undefined;
+    } catch {}
+    this.refresh();
+  }
 
-  ngOnInit() { this.refresh(); }
   ngOnDestroy() { this.clearTicker(); }
+
+  async doRefresh(ev: CustomEvent) {
+    await this.refresh();
+    (ev.target as HTMLIonRefresherElement).complete();
+  }
 
   async refresh() {
     this.loading = true;
@@ -64,28 +88,39 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
+  // Unified toggle for primary CTA and FAB
+  toggle() {
+    if (this.isRunning) { this.stop(); } else { this.start(); }
+  }
+
   start() {
-    if (this.isRunning) return;
+    if (this.isRunning || this.loading) return;
     this.loading = true;
     this.time.start().subscribe({
       next: async () => {
-        (await this.toast.create({ message: 'Started ✅', duration: 900 })).present();
+        (await this.toast.create({ message: 'Started ✅', duration: 900, position: 'top' })).present();
         this.refresh();
       },
-      error: async e => (await this.toast.create({ message: e?.error || 'Already running?', color: 'warning', duration: 1400 })).present(),
+      error: async e => (await this.toast.create({
+        message: e?.error || 'Already running?',
+        color: 'warning', duration: 1400, position: 'top'
+      })).present(),
       complete: () => (this.loading = false),
     });
   }
 
   stop() {
-    if (!this.isRunning) return;
+    if (!this.isRunning || this.loading) return;
     this.loading = true;
     this.time.stop().subscribe({
       next: async () => {
-        (await this.toast.create({ message: 'Stopped ✅', duration: 900 })).present();
+        (await this.toast.create({ message: 'Stopped ✅', duration: 900, position: 'top' })).present();
         this.refresh();
       },
-      error: async e => (await this.toast.create({ message: e?.error || 'No open session', color: 'warning', duration: 1400 })).present(),
+      error: async e => (await this.toast.create({
+        message: e?.error || 'No open session',
+        color: 'warning', duration: 1400, position: 'top'
+      })).present(),
       complete: () => (this.loading = false),
     });
   }
@@ -95,6 +130,11 @@ export class HomePage implements OnInit, OnDestroy {
       complete: () => this.router.navigateByUrl('/login', { replaceUrl: true }),
       error:    () => this.router.navigateByUrl('/login', { replaceUrl: true })
     });
+  }
+
+  viewAllDays() {
+    // TODO: implement navigation when you add history page
+    // this.router.navigateByUrl('/history');
   }
 
   // --- live ticker ---

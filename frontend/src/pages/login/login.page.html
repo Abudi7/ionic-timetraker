@@ -1,33 +1,65 @@
-<ion-header collapse="condense" translucent="true">
-    <div class="app-header">
-      <div>
-        <div class="app-title">Sign In</div>
-        <div class="app-sub">Welcome back</div>
-      </div>
-    </div>
-  </ion-header>
-  
-  <ion-content fullscreen>
-    <div class="ion-padding">
-      <ion-card class="card-glass">
-        <ion-card-content>
+<ion-header translucent="true">
+  <ion-toolbar class="blur-toolbar">
+    <ion-title>Sign In</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="gradient-bg" [fullscreen]="true">
+  <!-- Animated background blobs -->
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+
+  <div class="wrap ion-padding">
+    <ion-card class="glass card">
+      <ion-card-content>
+        <div class="brand">
+          <div class="logo-pulse">⏱️</div>
+          <h1>TimeTrac</h1>
+          <p>Welcome back. Please sign in.</p>
+        </div>
+
+        <form (ngSubmit)="doLogin()" autocomplete="on">
           <ion-list lines="none">
-            <ion-item class="card-glass" style="border-radius:14px;margin:8px;">
-              <ion-input label="Email" label-placement="floating" [(ngModel)]="email" type="email"></ion-input>
+            <ion-item class="field glass">
+              <ion-icon name="mail-outline" slot="start"></ion-icon>
+              <ion-input
+                [(ngModel)]="email" name="email"
+                type="email" autocomplete="email"
+                label="Email" label-placement="floating"
+                required>
+              </ion-input>
             </ion-item>
-            <ion-item class="card-glass" style="border-radius:14px;margin:8px;">
-              <ion-input label="Password" label-placement="floating" [(ngModel)]="password" type="password"></ion-input>
+
+            <ion-item class="field glass">
+              <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+              <ion-input
+                [(ngModel)]="password" name="password"
+                [type]="showPass ? 'text' : 'password'"
+                autocomplete="current-password"
+                label="Password" label-placement="floating"
+                required>
+              </ion-input>
+              <ion-button fill="clear" slot="end" size="small" (click)="showPass = !showPass" type="button">
+                <ion-icon [name]="showPass ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </ion-button>
             </ion-item>
           </ion-list>
-  
-          <ion-button expand="block" class="btn-primary" (click)="doLogin()" [disabled]="loading">
-            {{ loading ? 'Loading…' : 'Login' }}
+
+          <ion-button class="cta" expand="block" size="large" shape="round" type="submit" [disabled]="loading">
+            <ion-spinner *ngIf="loading" name="crescent" slot="start"></ion-spinner>
+            {{ loading ? 'Signing in…' : 'Sign In' }}
           </ion-button>
-          <ion-button expand="block" fill="clear" class="btn-ghost" (click)="quickRegister()" style="margin-top:8px;">
-            Quick Register
+
+          <ion-button fill="clear" expand="block" (click)="quickRegister()" [disabled]="loading">
+            Create quick account
           </ion-button>
-        </ion-card-content>
-      </ion-card>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <div class="footer">
+      <ion-text color="medium">© {{year}} TimeTrac</ion-text>
     </div>
-  </ion-content>
-  
+  </div>
+</ion-content>

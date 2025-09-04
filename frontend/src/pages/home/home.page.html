@@ -1,46 +1,114 @@
-<ion-header>
-    <ion-toolbar>
-      <ion-title>TimeTrac</ion-title>
-      <ion-buttons slot="end">
-        <ion-button (click)="logout()">Logout</ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
-  
-  <ion-content class="ion-padding gradient-bg">
-    <ion-card>
-      <ion-card-header>
-        <ion-card-title>Today's Total</ion-card-title>
-        <ion-card-subtitle>
-          {{ displayedTotal }} min
-          <span *ngIf="isRunning">&nbsp;•&nbsp;Running: {{ liveDisplay }}</span>
-        </ion-card-subtitle>
-      </ion-card-header>
-  
-      <ion-card-content>
-        <div class="live-counter" *ngIf="isRunning">{{ liveDisplay }}</div>
-  
-        <ion-button expand="block" (click)="start()" [disabled]="loading || isRunning">Start</ion-button>
-        <ion-button expand="block" color="medium" (click)="stop()" [disabled]="loading || !isRunning">Stop</ion-button>
-        <ion-button fill="clear" (click)="refresh()" [disabled]="loading">Refresh</ion-button>
-      </ion-card-content>
-    </ion-card>
-  
-    <ion-list>
-      <ion-list-header>Today's Sessions</ion-list-header>
-      <ion-item *ngFor="let s of sessions">
+<ion-header translucent="true">
+  <ion-toolbar class="blur-toolbar">
+    <ion-title>TimeTrac</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-chip color="medium" class="user-chip" *ngIf="userName || userAvatar">
+        <ion-avatar *ngIf="userAvatar"><img [src]="userAvatar" alt="avatar" /></ion-avatar>
+        <ion-label *ngIf="userName">{{ userName }}</ion-label>
+      </ion-chip>
+      <ion-button fill="clear" (click)="logout()">
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        Logout
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<!-- in home.page.html toolbar -->
+<ion-chip color="medium" class="user-chip" *ngIf="userName || userAvatar">
+  <ion-avatar *ngIf="userAvatar"><img [src]="userAvatar" alt="avatar" /></ion-avatar>
+  <ion-label>{{ userName }}</ion-label>   <!-- email appears here -->
+</ion-chip>
+
+
+<ion-content class="ion-padding gradient-bg" [fullscreen]="true">
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content pullingText="Pull to refresh" refreshingSpinner="circles"></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Hero / Today card -->
+  <ion-card class="glass">
+    <ion-card-header>
+      <ion-card-subtitle>Today's Total</ion-card-subtitle>
+      <ion-card-title class="total">
+        {{ displayedTotal }} <span>min</span>
+      </ion-card-title>
+      <div class="live" *ngIf="isRunning">
+        <ion-icon name="time-outline"></ion-icon>
+        <span>Running: {{ liveDisplay }}</span>
+      </div>
+    </ion-card-header>
+
+    <ion-card-content>
+      <!-- Big live counter -->
+      <div class="live-counter" *ngIf="isRunning">{{ liveDisplay }}</div>
+
+      <div class="cta">
+        <ion-button size="large" expand="block" shape="round" (click)="toggle()"
+                    [color]="isRunning ? 'danger' : 'primary'" [disabled]="loading">
+          <ion-icon [name]="isRunning ? 'pause' : 'play'" slot="start"></ion-icon>
+          {{ isRunning ? 'Stop' : 'Start' }}
+        </ion-button>
+
+        <div class="row">
+          <ion-button fill="outline" expand="block" (click)="refresh()" [disabled]="loading">
+            <ion-icon name="refresh-outline" slot="start"></ion-icon> Refresh
+          </ion-button>
+          <ion-button fill="clear" expand="block" color="medium" (click)="viewAllDays()">
+            <ion-icon name="calendar-outline" slot="start"></ion-icon> History
+          </ion-button>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Sessions list -->
+  <ion-list class="glass list">
+    <ion-list-header>
+      <ion-label>Today's Sessions</ion-label>
+      <ion-badge color="tertiary" *ngIf="sessions?.length">{{ sessions.length }}</ion-badge>
+    </ion-list-header>
+
+    <!-- Skeleton while loading -->
+    <ng-container *ngIf="loading; else realList">
+      <ion-item *ngFor="let i of skeletons">
         <ion-label>
-          <h3>#{{ s.id }}</h3>
-          <p>Start: {{ s.startTime | date:'short' }}</p>
-          <p *ngIf="s.endTime">End: {{ s.endTime | date:'short' }}</p>
-          <p *ngIf="s.durationMinutes != null">Duration: {{ s.durationMinutes }} min</p>
-          <p *ngIf="!s.endTime">Running…</p>
+          <h3><ion-skeleton-text [animated]="true" style="width: 40%"></ion-skeleton-text></h3>
+          <p><ion-skeleton-text [animated]="true" style="width: 70%"></ion-skeleton-text></p>
+          <p><ion-skeleton-text [animated]="true" style="width: 55%"></ion-skeleton-text></p>
         </ion-label>
       </ion-item>
-  
+    </ng-container>
+
+    <ng-template #realList>
+      <ion-item *ngFor="let s of sessions">
+        <ion-icon slot="start" [name]="s.endTime ? 'checkmark-circle-outline' : 'pulse-outline'"></ion-icon>
+        <ion-label>
+          <h3>Session #{{ s.id }}</h3>
+          <p>Start: {{ s.startTime | date:'short' }}</p>
+          <p *ngIf="s.endTime">End: {{ s.endTime | date:'short' }}</p>
+          <p *ngIf="s.durationMinutes != null">
+            Duration:
+            <ion-chip size="small" color="success" class="tight">{{ s.durationMinutes }} min</ion-chip>
+          </p>
+          <p *ngIf="!s.endTime" class="running">
+            <ion-badge color="warning">Running…</ion-badge>
+          </p>
+        </ion-label>
+        <ion-badge slot="end" color="light" *ngIf="s.project">{{ s.project }}</ion-badge>
+      </ion-item>
+
       <ion-item *ngIf="!sessions?.length">
         <ion-label>No sessions yet today.</ion-label>
       </ion-item>
-    </ion-list>
-  </ion-content>
-  
+    </ng-template>
+  </ion-list>
+
+  <!-- Floating play/pause for thumb use (iOS/web) -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button [color]="isRunning ? 'danger' : 'primary'" (click)="toggle()" [disabled]="loading">
+      <ion-icon [name]="isRunning ? 'pause' : 'play'"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

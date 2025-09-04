@@ -1,1 +1,78 @@
-ion-button { margin-top: 8px; }
+:host {
+    --glass-bg: rgba(255,255,255,0.08);
+    --glass-brd: rgba(255,255,255,0.25);
+  }
+  
+  /* Consistent look web + iOS */
+  .blur-toolbar {
+    --background: rgba(16,16,20,0.25);
+    backdrop-filter: saturate(1.1) blur(10px);
+  }
+  
+  .gradient-bg {
+    position: relative;
+    min-height: 100%;
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6 60%, #14b8a6); /* fallback */
+  }
+  
+  /* Animated blobs */
+  .blob {
+    position: absolute; filter: blur(50px); opacity: .35; border-radius: 50%;
+    animation: float 12s ease-in-out infinite alternate;
+  }
+  .b1 { width: 420px; height: 420px; background: #60a5fa; top: -120px; left: -120px; }
+  .b2 { width: 360px; height: 360px; background: #a78bfa; right: -100px; top: 20%; animation-delay: .8s; }
+  .b3 { width: 380px; height: 380px; background: #34d399; left: 20%; bottom: -140px; animation-delay: 1.3s; }
+  
+  @keyframes float {
+    to { transform: translate3d(0, -18px, 0) scale(1.03); opacity: .45; }
+  }
+  
+  .wrap {
+    display: grid; place-items: center; min-height: 100%;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+  }
+  
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-brd);
+    border-radius: 20px;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.18);
+  }
+  
+  .card {
+    width: min(520px, 92vw);
+    animation: cardIn .6s ease forwards;
+    transform: translateY(10px); opacity: 0;
+  }
+  @keyframes cardIn { to { transform: translateY(0); opacity: 1; } }
+  
+  .brand {
+    text-align: center; margin-bottom: 8px;
+    h1 { margin: 6px 0 2px; font-weight: 800; letter-spacing: -.02em; }
+    p  { margin: 0; opacity: .85; }
+  }
+  .logo-pulse {
+    width: 64px; height: 64px; display: grid; place-items: center;
+    margin: 4px auto 2px; font-size: 28px; border-radius: 20px;
+    background: rgba(255,255,255,.12);
+    animation: pulse 1.8s infinite ease-in-out;
+  }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+  
+  .field {
+    --padding-start: 10px;
+    margin: 10px 0;
+    border-radius: 16px;
+    ion-icon[slot="start"] { font-size: 20px; opacity: .9; }
+  }
+  
+  .cta { margin-top: 10px; }
+  
+  /* Dark mode tune */
+  :root.ion-palette-dark {
+    --glass-bg: rgba(18,18,24,0.5);
+    --glass-brd: rgba(255,255,255,0.06);
+  }
+  

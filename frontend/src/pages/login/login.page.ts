@@ -15,7 +15,9 @@ import { AuthService } from '../../core/auth.service';
 export class LoginPage {
   email = 'test1@demo.io';
   password = 'secret123';
+  showPass = false;
   loading = false;
+  year = new Date().getFullYear();
 
   constructor(
     private auth: AuthService,
@@ -24,32 +26,28 @@ export class LoginPage {
   ) {}
 
   doLogin() {
+    if (this.loading) return;
     this.loading = true;
     this.auth.login(this.email, this.password).subscribe({
-      next: () => {
-        this.toast.create({ message: 'Logged in ✅', duration: 1200 })
-          .then(t => t.present());
+      next: async () => {
+        (await this.toast.create({ message: 'Logged in ✅', duration: 1000, position: 'top' })).present();
         this.router.navigateByUrl('/home', { replaceUrl: true });
       },
-      error: (e: any) => {
+      error: async (e: any) => {
         const msg = e?.error?.message || e?.error || 'Login failed';
-        this.toast.create({ message: msg, color: 'danger', duration: 1600 })
-          .then(t => t.present());
+        (await this.toast.create({ message: msg, color: 'danger', duration: 1500, position: 'top' })).present();
       },
-      complete: () => { this.loading = false; }
+      complete: () => (this.loading = false),
     });
   }
 
   quickRegister() {
+    if (this.loading) return;
     this.auth.register(this.email, this.password).subscribe({
-      next: () => {
-        this.toast.create({ message: 'Registered ✅', duration: 1200 })
-          .then(t => t.present());
-      },
-      error: (e: any) => {
+      next: async () => (await this.toast.create({ message: 'Registered ✅', duration: 1000, position: 'top' })).present(),
+      error: async (e: any) => {
         const msg = e?.error?.message || e?.error || 'Register failed';
-        this.toast.create({ message: msg, color: 'danger', duration: 1600 })
-          .then(t => t.present());
+        (await this.toast.create({ message: msg, color: 'danger', duration: 1500, position: 'top' })).present();
       }
     });
   }
